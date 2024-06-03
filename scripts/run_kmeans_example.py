@@ -6,8 +6,13 @@ from functools import partial
 import numpy as np
 import torch
 
-from controversialstimuli.optimization.torch_transform_image import ActMaxTorchTransfBaseUni
-from controversialstimuli.optimization.controversial_objectives import ContrastiveNeuronUnif, ObjectiveIncrease
+from controversialstimuli.optimization.torch_transform_image import (
+    ActMaxTorchTransfBaseUni,
+)
+from controversialstimuli.optimization.controversial_objectives import (
+    ContrastiveNeuronUnif,
+    ObjectiveIncrease,
+)
 from controversialstimuli.optimization.stoppers import EMALossStopper
 
 from controversialstimuli.models.clustering_model import TestOnOffModel
@@ -18,7 +23,8 @@ from controversialstimuli.clustering.kmeans import KMeans, DefaultLogger
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Run clustering on simple on/off neuron model with "
-                    "a two dimensional 18x18 stimulus image")
+        "a two dimensional 18x18 stimulus image"
+    )
 
     parser.add_argument(
         "--num_clusters",
@@ -28,22 +34,17 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--num_neurons",
-        default=42,
-        type=int,
-        help="Number of neurons in on/off model"
+        "--num_neurons", default=42, type=int, help="Number of neurons in on/off model"
     )
 
     parser.add_argument(
-        "--device",
-        default="cuda",
-        help="The device to run on, e.g. cpu or cuda"
+        "--device", default="cuda", help="The device to run on, e.g. cpu or cuda"
     )
 
     parser.add_argument(
         "--save_data_path",
         default="./kmeans_results",
-        help="The folder in which the output of the clustering is stored in (including plots)"
+        help="The folder in which the output of the clustering is stored in (including plots)",
     )
 
     parser.add_argument(
@@ -57,7 +58,7 @@ def parse_args():
         "--max_iterations_optimization",
         default=50,
         type=int,
-        help="Max iterations of each stimulus optimization during the optimization step of the clustering algorithm"
+        help="Max iterations of each stimulus optimization during the optimization step of the clustering algorithm",
     )
 
     parser.add_argument(
@@ -76,7 +77,7 @@ def parse_args():
         "--temperature",
         default=1.6,
         type=float,
-        help="Temperature used in the contrastive loss function"
+        help="Temperature used in the contrastive loss function",
     )
 
     parser.add_argument(
@@ -153,12 +154,17 @@ def main() -> None:
     final_loss = kmeans.evaluate_training_loss()
 
     # Safe final kmeans state
-    kmeans.save_cluster_results_to_folder(args.save_data_path, "final_kmeans_results.pkl")
+    kmeans.save_cluster_results_to_folder(
+        args.save_data_path, "final_kmeans_results.pkl"
+    )
     # plot confusion matrices
     kmeans.plot_response_confusion_matrix(
-        f"{args.save_data_path}/final_response_confusion_matrix.pdf", title=f"Final loss: {final_loss:.5f}"
+        f"{args.save_data_path}/final_response_confusion_matrix.pdf",
+        title=f"Final loss: {final_loss:.5f}",
     )
-    print(f"Finished clustering with {kmeans._num_clusters} clusters and a final loss of: {final_loss:.5f}")
+    print(
+        f"Finished clustering with {kmeans._num_clusters} clusters and a final loss of: {final_loss:.5f}"
+    )
 
 
 if __name__ == "__main__":

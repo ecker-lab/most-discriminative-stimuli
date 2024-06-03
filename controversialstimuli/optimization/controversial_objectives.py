@@ -19,11 +19,16 @@ logger = logging.getLogger(__name__)
 
 
 class ObjectiveABC(ABC, nn.Module):
-    def __init__(self, subt_pred: Optional[torch.Tensor]=None, div_pred: Optional[torch.Tensor]=None, clip_div_pred_min: float=CLIP_DIV_PRED_MIN):
+    def __init__(
+        self,
+        subt_pred: Optional[torch.Tensor] = None,
+        div_pred: Optional[torch.Tensor] = None,
+        clip_div_pred_min: float = CLIP_DIV_PRED_MIN,
+    ):
         """Base class for objectives
 
         Args:
-            subt_pred (Optional[torch.Tensor], optional): Subtract from predictions/logit before feeding into the 
+            subt_pred (Optional[torch.Tensor], optional): Subtract from predictions/logit before feeding into the
                 objective. Defaults to None.
             div_pred (Optional[torch.Tensor], optional): Divide predictions/logit before feeding into the objective.
                 Defaults to None.
@@ -32,26 +37,31 @@ class ObjectiveABC(ABC, nn.Module):
         super().__init__()
         self.register_buffer(
             "_div_pred",
-            torch.tensor(np.clip(div_pred, a_min=clip_div_pred_min, a_max=None))
-            if div_pred is not None
-            else torch.tensor(1),
+            (
+                torch.tensor(np.clip(div_pred, a_min=clip_div_pred_min, a_max=None))
+                if div_pred is not None
+                else torch.tensor(1)
+            ),
         )
-        self.register_buffer("_subt_pred", torch.tensor(subt_pred) if subt_pred is not None else torch.tensor(0))
+        self.register_buffer(
+            "_subt_pred",
+            torch.tensor(subt_pred) if subt_pred is not None else torch.tensor(0),
+        )
 
     def _norm(self, pred: torch.Tensor) -> torch.Tensor:
-            """
-            Normalize the predicted tensor.
+        """
+        Normalize the predicted tensor.
 
-            Args:
-                pred (torch.Tensor): The predicted tensor.
+        Args:
+            pred (torch.Tensor): The predicted tensor.
 
-            Returns:
-                torch.Tensor: The normalized tensor.
-            """
-            ret = (pred - self._subt_pred) / (self._div_pred + EPSILON)
-            logger.debug(f"norm_pred mean: {ret.detach().cpu().numpy().mean()}")
-            logger.debug(f"norm_pred std, {ret.detach().cpu().numpy().std()}")
-            return ret
+        Returns:
+            torch.Tensor: The normalized tensor.
+        """
+        ret = (pred - self._subt_pred) / (self._div_pred + EPSILON)
+        logger.debug(f"norm_pred mean: {ret.detach().cpu().numpy().mean()}")
+        logger.debug(f"norm_pred std, {ret.detach().cpu().numpy().std()}")
+        return ret
 
     def _check_clust_assignments(self, clust_assignments):
         """
@@ -64,11 +74,15 @@ class ObjectiveABC(ABC, nn.Module):
             ValueError: If the length of `clust_assignments` does not match the length of `self._div_pred` or `self._subt_pred`.
 
         """
-        if len(self._div_pred.shape) > 0 and len(clust_assignments) != len(self._div_pred):
+        if len(self._div_pred.shape) > 0 and len(clust_assignments) != len(
+            self._div_pred
+        ):
             raise ValueError(
                 f"clust_assignments and div_pred must have the same length. Got {len(clust_assignments)} and {len(self._div_pred)}"
             )
-        if len(self._subt_pred.shape) > 0 and len(clust_assignments) != len(self._subt_pred):
+        if len(self._subt_pred.shape) > 0 and len(clust_assignments) != len(
+            self._subt_pred
+        ):
             raise ValueError(
                 f"clust_assignments and subt_pred must have the same length. Got {len(clust_assignments)} and {len(self._subt_pred)}"
             )
@@ -120,7 +134,9 @@ class MeanNeuron(ObjectiveABC):
         assert (
             len(set(off_clust_idc).intersection({on_clust_idx})) == 0
         ), "on_clust_idx and off_clust_idc must be disjoint"
-        self.register_buffer("_on_units_mask", torch.tensor(clust_assignments == on_clust_idx))
+        self.register_buffer(
+            "_on_units_mask", torch.tensor(clust_assignments == on_clust_idx)
+        )
 
     def forward(self, unit_scores: torch.FloatTensor) -> torch.FloatTensor:
         """
@@ -178,13 +194,17 @@ class ObjectiveIncrease(ObjectiveABC):
             raise NotImplementedError("passing clust_assignments is not implemented.")
         if unit_idc is not None:
             raise NotImplementedError("passing unit_idc is not implemented.")
-        
+
         self._cluster_assignments = clust_assignments
-        self.register_buffer("_on_units_mask", torch.tensor(clust_assignments == on_clust_idx))
+        self.register_buffer(
+            "_on_units_mask", torch.tensor(clust_assignments == on_clust_idx)
+        )
 
 
 def contrastive_neuron_objective(
-    on_logits_mean: torch.Tensor, logit_cluster_means: torch.Tensor, temperature: float = 1.0
+    on_logits_mean: torch.Tensor,
+    logit_cluster_means: torch.Tensor,
+    temperature: float = 1.0,
 ) -> torch.Tensor:
     """Computes the contrastive objective Eq. (1) for a single on cluster.
 
@@ -198,7 +218,11 @@ def contrastive_neuron_objective(
     """
     t = temperature
     ll_means = logit_cluster_means
-    obj = (1 / t) * on_logits_mean - torch.logsumexp((1 / t) * ll_means, dim=0) + torch.log(torch.tensor(len(ll_means)))
+    obj = (
+        (1 / t) * on_logits_mean
+        - torch.logsumexp((1 / t) * ll_means, dim=0)
+        + torch.log(torch.tensor(len(ll_means)))
+    )
     return obj
 
 
@@ -215,7 +239,7 @@ class ContrastiveNeuronUnif(ObjectiveABC):
         device: str = "cuda",
     ):
         """Computes the contrastive objective Eq. (1) for a single on cluster.
-        
+
         Args:
             on_clust_idx: The index of the cluster that should be on.
             off_clust_idc: The indices of the clusters that should be off.
@@ -225,13 +249,21 @@ class ContrastiveNeuronUnif(ObjectiveABC):
             div_pred: see ObjectiveABC
             clip_div_pred_min: see ObjectiveABC
         """
-        super().__init__(subt_pred=subt_pred, div_pred=div_pred, clip_div_pred_min=clip_div_pred_min)
+        super().__init__(
+            subt_pred=subt_pred, div_pred=div_pred, clip_div_pred_min=clip_div_pred_min
+        )
         self._temperature = nn.Parameter(torch.tensor(temperature), requires_grad=False)
         self._device = device
         self._unit_idc = None
         self.set_clusters(on_clust_idx, off_clust_idc, clust_assignments)
 
-    def set_clusters(self, on_clust_idx: int, off_clust_idc: Union[NDArray, List[NDArray]], clust_assignments: List[int], unit_idc: Optional[List[int]] = None):
+    def set_clusters(
+        self,
+        on_clust_idx: int,
+        off_clust_idc: Union[NDArray, List[NDArray]],
+        clust_assignments: List[int],
+        unit_idc: Optional[List[int]] = None,
+    ):
         self._check_clust_assignments(clust_assignments)
 
         if isinstance(clust_assignments, torch.Tensor):
@@ -242,19 +274,34 @@ class ContrastiveNeuronUnif(ObjectiveABC):
             pass
 
         on_clust_idx = int(on_clust_idx)
-        cluster_ids_without_on_cluster = sorted(set(clust_assignments) - {int(on_clust_idx)})
+        cluster_ids_without_on_cluster = sorted(
+            set(clust_assignments) - {int(on_clust_idx)}
+        )
         on_off_cluster_set = {idx for idx in off_clust_idc}
         on_off_cluster_set.add(on_clust_idx)
         # on cluster will be at the first position
-        cluster_ids_to_optimize = [idx for idx in [on_clust_idx] + cluster_ids_without_on_cluster if idx in on_off_cluster_set]
+        cluster_ids_to_optimize = [
+            idx
+            for idx in [on_clust_idx] + cluster_ids_without_on_cluster
+            if idx in on_off_cluster_set
+        ]
 
-        cluster_masks_list = [torch.tensor(clust_assignments) == clust_idx for clust_idx in cluster_ids_to_optimize]
+        cluster_masks_list = [
+            torch.tensor(clust_assignments) == clust_idx
+            for clust_idx in cluster_ids_to_optimize
+        ]
         cluster_masks = torch.stack(cluster_masks_list).to(self._device)
-        assert torch.all(cluster_masks.sum(-1) > 0), "Some cluster did not have entries, this will lead to infinities"
+        assert torch.all(
+            cluster_masks.sum(-1) > 0
+        ), "Some cluster did not have entries, this will lead to infinities"
 
-        self._normalized_cluster_mask = cluster_masks / cluster_masks.sum(-1, keepdim=True)
+        self._normalized_cluster_mask = cluster_masks / cluster_masks.sum(
+            -1, keepdim=True
+        )
         if unit_idc is not None:
-            self._unit_idc = torch.tensor(unit_idc, requires_grad=False).to(self._device)
+            self._unit_idc = torch.tensor(unit_idc, requires_grad=False).to(
+                self._device
+            )
 
     def forward(self, logits: torch.Tensor) -> torch.Tensor:
         """
@@ -275,7 +322,9 @@ class ContrastiveNeuronUnif(ObjectiveABC):
         l_clust_means = (expanded_logits * self._normalized_cluster_mask).sum(-1)
         # In set_clusters we made sure that the on_cluster is at the first position
         on_clust_mean = l_clust_means[0]
-        loss = contrastive_neuron_objective(on_clust_mean, l_clust_means, self._temperature)
+        loss = contrastive_neuron_objective(
+            on_clust_mean, l_clust_means, self._temperature
+        )
 
         assert loss.isfinite()
         return loss

@@ -4,7 +4,9 @@ import numpy as np
 import scipy
 
 
-def butter_lowpass_filter(data: np.array, lowpass_cutoff: float, fs: float, order: int = 5):
+def butter_lowpass_filter(
+    data: np.array, lowpass_cutoff: float, fs: float, order: int = 5
+):
     b, a = scipy.signal.butter(order, Wn=lowpass_cutoff, fs=fs, btype="low")
     y = scipy.signal.filtfilt(b, a, data)
     return y
@@ -15,7 +17,9 @@ def calculate_fft(
     sampling_frequency: float = 30.0,
     lowpass_cutoff: float = 10.0,
 ) -> Tuple[np.array, np.array]:
-    y = butter_lowpass_filter(temporal_kernel, lowpass_cutoff=lowpass_cutoff, fs=sampling_frequency)
+    y = butter_lowpass_filter(
+        temporal_kernel, lowpass_cutoff=lowpass_cutoff, fs=sampling_frequency
+    )
     n_samples = temporal_kernel.shape[0]
     fft_frequencies = scipy.fft.fftfreq(n_samples, 1 / sampling_frequency)
     fft_values = scipy.fft.fft(y)
@@ -32,7 +36,9 @@ def weighted_main_frequency(fft_frequencies: np.array, fft_weights: np.array) ->
     return np.average(fft_frequencies, weights=fft_weights)
 
 
-def decompose_kernel(space_time_kernel: np.array, scaling_factor: float = 1.0) -> Tuple[np.array, np.array, np.array]:
+def decompose_kernel(
+    space_time_kernel: np.array, scaling_factor: float = 1.0
+) -> Tuple[np.array, np.array, np.array]:
     """
     Scale spatial and temporal components such that spatial component is in the range [-1, 1]
     Args:
@@ -53,7 +59,12 @@ def decompose_kernel(space_time_kernel: np.array, scaling_factor: float = 1.0) -
     temporal = temporal * abs_max_val * scaling_factor
     reshaped_spatial = spatial.reshape((dy, dx))
     center_x, center_y = int(dy / 2), int(dx / 2)
-    if np.mean(reshaped_spatial[center_x - 3 : center_x + 2, center_y - 3 : center_y + 2]) < 0:
+    if (
+        np.mean(
+            reshaped_spatial[center_x - 3 : center_x + 2, center_y - 3 : center_y + 2]
+        )
+        < 0
+    ):
         spatial *= -1
         temporal *= -1
     singular_values = S[1]

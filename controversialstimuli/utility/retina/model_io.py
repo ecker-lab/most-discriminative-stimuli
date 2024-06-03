@@ -21,7 +21,14 @@ class Center:
 
     def __call__(self, model):
         key_components = [
-            comp for comp in zip(*[key.split(".") for key in model.state_dict().keys() if self.mean_key in key])
+            comp
+            for comp in zip(
+                *[
+                    key.split(".")
+                    for key in model.state_dict().keys()
+                    if self.mean_key in key
+                ]
+            )
         ]
         mean_full_keys = [
             ".".join([key_components[j][i] for j in range(len(key_components))])
@@ -31,13 +38,15 @@ class Center:
         mod_state_dict = deepcopy(model.state_dict())
         device = mod_state_dict[mean_full_keys[0]].device
         for mean_full_key in mean_full_keys:
-            mod_state_dict[mean_full_key] = torch.zeros_like(model.state_dict()[mean_full_key]) + torch.tensor(
-                self.target_mean, device=device
-            )
+            mod_state_dict[mean_full_key] = torch.zeros_like(
+                model.state_dict()[mean_full_key]
+            ) + torch.tensor(self.target_mean, device=device)
         model.load_state_dict(mod_state_dict)
 
 
-def load_ensemble_retina_model_from_directory(directory_path: str, device: str = "cuda") -> Tuple:
+def load_ensemble_retina_model_from_directory(
+    directory_path: str, device: str = "cuda"
+) -> Tuple:
     """
     Returns an ensemble data_info object and an ensemble model that it loads from the directory path.
 
@@ -49,7 +58,9 @@ def load_ensemble_retina_model_from_directory(directory_path: str, device: str =
     """
 
     file_names = [f for f in os.listdir(directory_path) if f.endswith("yaml")]
-    seed_array = [int(file_name[: -len(".yaml")].split("_")[1]) for file_name in file_names]
+    seed_array = [
+        int(file_name[: -len(".yaml")].split("_")[1]) for file_name in file_names
+    ]
     model_list = []
     data_info_list = []
 
@@ -69,7 +80,11 @@ def load_ensemble_retina_model_from_directory(directory_path: str, device: str =
         model_fn = config["model_fn"]
         model_config = config["model_config"]
         model = nnfabrik.builder.get_model(
-            model_fn, model_config, seed=seed, data_info=data_info, state_dict=state_dict
+            model_fn,
+            model_config,
+            seed=seed,
+            data_info=data_info,
+            state_dict=state_dict,
         )
         model_list.append(model)
 

@@ -7,7 +7,11 @@ import numpy as np
 from tqdm.auto import tqdm
 
 from ..optimization.torch_transform_image import ActMaxTorchTransfBaseUni
-from ..optimization.controversial_objectives import ContrastiveAcrossImgs, ContrastiveNeuron, ContrastiveNeuronUnif
+from ..optimization.controversial_objectives import (
+    ContrastiveAcrossImgs,
+    ContrastiveNeuron,
+    ContrastiveNeuronUnif,
+)
 from .kmeans import KMeans
 
 
@@ -20,7 +24,9 @@ class SplitMerge:
         img_optimizer: ActMaxTorchTransfBaseUni,
         unit_idc: List[int],  # MUST MATCH MODEL OUTPUT
         cluster_idc: List[int],  # ALL CLUSTER INDICES, e.g. list(range(num_clusters))
-        init_cluster_assignments: Optional[Tuple[Dict[int, List[int]]]] = None,  # maps cluster index to neuron index
+        init_cluster_assignments: Optional[
+            Tuple[Dict[int, List[int]]]
+        ] = None,  # maps cluster index to neuron index
         seed: int = 42,
         max_iter_global: Optional[int] = None,
         max_iter_split_kmeans: Optional[int] = None,
@@ -64,16 +70,21 @@ class SplitMerge:
             )
             clust_assign_changed = global_kmeans.run()
             self._cluster_img_dict = global_kmeans._cluster_img_dict
-            self._cluster_assignments = global_kmeans._cluster_assignments  # dict, cluster_id -> neuron_id
+            self._cluster_assignments = (
+                global_kmeans._cluster_assignments
+            )  # dict, cluster_id -> neuron_id
             self._neuron_id2cluster_dict = global_kmeans._neuron_id2cluster_dict
             global_predictions = (
                 global_kmeans._predict()
             )  # (self._clust_idc, self._unit_idc) shaped ndarray of model responses to the cluster images
 
-            split_clust_assign_changed, modified_cluster_idc = self._split(global_predictions)
+            split_clust_assign_changed, modified_cluster_idc = self._split(
+                global_predictions
+            )
             clust_assign_changed = split_clust_assign_changed or clust_assign_changed
             clust_assign_changed = (
-                self._merge(global_predictions, ignore_clust_idc=modified_cluster_idc) or clust_assign_changed
+                self._merge(global_predictions, ignore_clust_idc=modified_cluster_idc)
+                or clust_assign_changed
             )
 
         self._save_results()
@@ -85,7 +96,9 @@ class SplitMerge:
         """
         # find candidates for splitting
         if not isinstance(self._img_optimizer.objective_fct, ContrastiveNeuronUnif):
-            raise NotImplementedError("Verify if implemented for other objective functions")
+            raise NotImplementedError(
+                "Verify if implemented for other objective functions"
+            )
 
         clust_assign_changed = False
         new_cluster_idc = []
@@ -97,17 +110,24 @@ class SplitMerge:
             self._img_optimizer.objective_fct.set_clusters(
                 on_clust_idx=clust_idx,
                 off_clust_idc=list(set(self._cluster_idc) - set([clust_idx])),
-                clust_assignments=np.array([self._neuron_id2cluster_dict[n] for n in sorted(self._unit_idc)]),
+                clust_assignments=np.array(
+                    [self._neuron_id2cluster_dict[n] for n in sorted(self._unit_idc)]
+                ),
             )
-            init_loss = -self._img_optimizer.objective_fct(pred.unsqueeze(0)).cpu().numpy()
+            init_loss = (
+                -self._img_optimizer.objective_fct(pred.unsqueeze(0)).cpu().numpy()
+            )
 
             # get neurons
             units_new_1 = set(
                 random.Random(self._seed).sample(
-                    self._cluster_assignments[clust_idx], len(self._cluster_assignments[clust_idx]) // 2
+                    self._cluster_assignments[clust_idx],
+                    len(self._cluster_assignments[clust_idx]) // 2,
                 )
             )
-            units_new_2 = sorted(list(set(self._cluster_assignments[clust_idx]) - units_new_1))
+            units_new_2 = sorted(
+                list(set(self._cluster_assignments[clust_idx]) - units_new_1)
+            )
             units_new_1 = sorted(list(units_new_1))
 
             # create new cluster
@@ -136,9 +156,16 @@ class SplitMerge:
                 self._img_optimizer.objective_fct.set_clusters(
                     on_clust_idx=clust_idx,
                     off_clust_idc=list(set(self._cluster_idc) - set([clust_idx])),
-                    clust_assignments=np.array([self._neuron_id2cluster_dict[n] for n in sorted(self._unit_idc)]),
+                    clust_assignments=np.array(
+                        [
+                            self._neuron_id2cluster_dict[n]
+                            for n in sorted(self._unit_idc)
+                        ]
+                    ),
                 )
-                loss_lst.append(-self._img_optimizer.objective_fct(pred.unsqueeze(0)).cpu().numpy())
+                loss_lst.append(
+                    -self._img_optimizer.objective_fct(pred.unsqueeze(0)).cpu().numpy()
+                )
             new_loss = np.mean(loss_lst)
 
             if new_loss < init_loss * (1 - self._objective_improvement_threshold):
@@ -163,16 +190,26 @@ class SplitMerge:
         """
 
         for clust1_idx, clust2_idx in tqdm(
-            combinations(list(set(self._cluster_idc) - set(ignore_clust_idc))), leave=False
+            combinations(list(set(self._cluster_idc) - set(ignore_clust_idc))),
+            leave=False,
         ):
             loss_lst = []
             for i in (clust1_idx, clust2_idx):
                 self._img_optimizer.objective_fct.set_clusters(
                     on_clust_idx=i,
                     off_clust_idc=list(set(self._cluster_idc) - set([i])),
-                    clust_assignments=np.array([self._neuron_id2cluster_dict[n] for n in sorted(self._unit_idc)]),
+                    clust_assignments=np.array(
+                        [
+                            self._neuron_id2cluster_dict[n]
+                            for n in sorted(self._unit_idc)
+                        ]
+                    ),
                 )
-                loss_lst.append(-self._img_optimizer.objective_fct(predictions[i].unsqueeze(0)).cpu().numpy())
+                loss_lst.append(
+                    -self._img_optimizer.objective_fct(predictions[i].unsqueeze(0))
+                    .cpu()
+                    .numpy()
+                )
             init_loss = np.mean(loss_lst)
 
             # TODO merging, get new cluster idx
@@ -183,9 +220,13 @@ class SplitMerge:
             self._img_optimizer.objective_fct.set_clusters(
                 on_clust_idx=new_clust_idx,
                 off_clust_idc=list(set(self._cluster_idc) - set([new_clust_idx])),
-                clust_assignments=np.array([self._neuron_id2cluster_dict[n] for n in sorted(self._unit_idc)]),
+                clust_assignments=np.array(
+                    [self._neuron_id2cluster_dict[n] for n in sorted(self._unit_idc)]
+                ),
             )
-            new_loss = -self._img_optimizer.objective_fct(new_pred.unsqueeze(0)).cpu().numpy()
+            new_loss = (
+                -self._img_optimizer.objective_fct(new_pred.unsqueeze(0)).cpu().numpy()
+            )
 
             if new_loss < init_loss * (1 - self._objective_improvement_threshold):
                 pass  # TODO)
@@ -195,6 +236,7 @@ class SplitMerge:
 
     def _get_mean_pred(self, predictions: np.array) -> np.array:
         mean_pred = [
-            predictions[:, self._cluster_assignments[i]] for i in sorted(self._cluster_assignments.keys())
+            predictions[:, self._cluster_assignments[i]]
+            for i in sorted(self._cluster_assignments.keys())
         ]  # (num_clusters, num_clusters), first index: images, last index: neurons
         return mean_pred

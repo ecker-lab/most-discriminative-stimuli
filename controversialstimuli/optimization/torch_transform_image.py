@@ -35,10 +35,10 @@ class ActMaxTorchTransfBaseUni(ActMaxClustImgBase):
         max_iter: int = 5000,
         seed: int = None,
         device: str = "cuda",
-        verbose: bool=False,
-        dj_ping: bool=False,
-        grad_precond_fct: Optional[Callable]=None,
-        num_imgs: int=1,
+        verbose: bool = False,
+        dj_ping: bool = False,
+        grad_precond_fct: Optional[Callable] = None,
+        num_imgs: int = 1,
         postprocessing: Optional[Callable] = None,
     ) -> None:
         """Stimulus optimizer class.
@@ -54,10 +54,10 @@ class ActMaxTorchTransfBaseUni(ActMaxClustImgBase):
             device (str, optional): Defaults to "cuda".
             verbose (bool, optional): Verbose output. Defaults to False.
             dj_ping (bool, optional): Ping datajoint database to keep connection alive. Defaults to False.
-            grad_precond_fct (Optional[Callable], optional): Function that is applied to the gradients on the stimulus 
+            grad_precond_fct (Optional[Callable], optional): Function that is applied to the gradients on the stimulus
                 before the optimization step is executed. For example mei.legacy.ops.GaussianBlur. Defaults to None.
             num_imgs (int, optional): Humber of images to simultaneously optimize. Defaults to 1.
-            postprocessing (Optional[Callable], optional): Function that is applied to the stimulus after the 
+            postprocessing (Optional[Callable], optional): Function that is applied to the stimulus after the
                 optimization step. For example mei.legacy.ops.ChangeNorm. Defaults to None.
         """
         self.device = device
@@ -73,7 +73,9 @@ class ActMaxTorchTransfBaseUni(ActMaxClustImgBase):
         self.verbose_print = get_verbose_print_fct(verbose)
         self.dj_ping = dj_ping
 
-        self.grad_precond_fct = grad_precond_fct if grad_precond_fct is not None else torch.nn.Identity()
+        self.grad_precond_fct = (
+            grad_precond_fct if grad_precond_fct is not None else torch.nn.Identity()
+        )
         self.num_imgs = num_imgs
 
         self._postprocessing = postprocessing
@@ -91,9 +93,9 @@ class ActMaxTorchTransfBaseUni(ActMaxClustImgBase):
 
     def reset(self, initial_stimulus: Optional[torch.FloatTensor]) -> None:
         """Reset the stimulus optimizer state.
-        
+
         Args:
-            initial_stimulus (Optional[torch.FloatTensor]): Initialize the reset stimulus with `initial_stimulus`. 
+            initial_stimulus (Optional[torch.FloatTensor]): Initialize the reset stimulus with `initial_stimulus`.
                 Defaults to None (stimulus is randomly initialized).
         """
         self.verbose_print("Resetting image optimizer")
@@ -108,10 +110,12 @@ class ActMaxTorchTransfBaseUni(ActMaxClustImgBase):
     def init_img(self, canvas_size: Tuple[int, ...]) -> Tensor:
         """Randomly initialize the stimulus."""
         if len(canvas_size) >= 3:
-            shape = (self.num_imgs, ) + canvas_size
+            shape = (self.num_imgs,) + canvas_size
         else:
             if canvas_size[0] != canvas_size[1]:
-                img_h = np.ceil(np.sqrt(canvas_size[0] ** 2 + canvas_size[1] ** 2)).astype(int)
+                img_h = np.ceil(
+                    np.sqrt(canvas_size[0] ** 2 + canvas_size[1] ** 2)
+                ).astype(int)
                 img_w = img_h
             else:
                 img_h = canvas_size[0]
@@ -124,8 +128,8 @@ class ActMaxTorchTransfBaseUni(ActMaxClustImgBase):
 
     @property
     def img(self) -> Tensor:
-        """Can be overwritten by derived classes such that image is returned after L2 normalization, sigmoid 
-            constraint, etc.
+        """Can be overwritten by derived classes such that image is returned after L2 normalization, sigmoid
+        constraint, etc.
         """
         img = self._img
         return img
@@ -171,13 +175,14 @@ class ActMaxTorchTransfBaseUni(ActMaxClustImgBase):
 
             if self.stopper is not None and isinstance(self.stopper, EMALossStopper):
                 self.stopper.update(self.get_pred_loss().detach())
-            elif self.stopper is not None and isinstance(self.stopper, ImgPxIntensityChangeStopper):
+            elif self.stopper is not None and isinstance(
+                self.stopper, ImgPxIntensityChangeStopper
+            ):
                 self.stopper.update(self.img)
 
             if self.stopper is not None and self.stopper.criterion_hit:
                 print("Stopper criterion reached")
                 return self.loss_lst[-1]
 
-        print(f'max_iter {self.max_iter} reached')
+        print(f"max_iter {self.max_iter} reached")
         return self.loss_lst[-1]
-

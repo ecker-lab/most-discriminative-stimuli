@@ -26,9 +26,9 @@ class ClusteringModelABC(ABC, torch.nn.Module):
         """Base class for neural predictive models defining the interface for the clustering algorithm.
 
         Args:
-            centered_ensemble_model (nn.Module): Ensemble of the predictive model with readout receptive field 
+            centered_ensemble_model (nn.Module): Ensemble of the predictive model with readout receptive field
                 positions being centered.
-            return_logits (bool, optional): Whether to return logits of the model or neural activity. 
+            return_logits (bool, optional): Whether to return logits of the model or neural activity.
                 Defaults to False.
             neuron_list (Optional[List[int]], optional): List of neurons that should be returned. Defaults to None (all
                 returned).
@@ -44,9 +44,9 @@ class ClusteringModelABC(ABC, torch.nn.Module):
     @abstractmethod
     def forward(self, inputs: torch.Tensor, kwargs: dict[str, Any]) -> torch.Tensor:
         """return logits of each neuron for its best rotation (if rotation is required)
-            needs to work with ensemble models
-            should also handle normalization
-            and also constrain the output to neuron_list, returning one vector of shape (batch, (optionaly time?), num_neurons)
+        needs to work with ensemble models
+        should also handle normalization
+        and also constrain the output to neuron_list, returning one vector of shape (batch, (optionaly time?), num_neurons)
         """
         pass
 
@@ -61,7 +61,7 @@ class TestOnOffModel(ClusteringModelABC):
         )  # type: ignore
 
     def forward(self, inputs: torch.Tensor, kwargs=None) -> torch.Tensor:
-        """ Returns the mean of the stimulus if the neuron index is even, otherwise returns the negative mean."""
+        """Returns the mean of the stimulus if the neuron index is even, otherwise returns the negative mean."""
 
         # take the mean over all dimension except the first batch dimension
         stimulus_mean = inputs.mean(dim=tuple(range(1, len(inputs.shape))))

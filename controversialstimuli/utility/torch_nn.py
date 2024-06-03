@@ -10,7 +10,7 @@ class SimpleLogSoftmaxTemperature(Module):
 
     def __init__(self, temperature: float = 1) -> None:
         """Initialize the SimpleLogSoftmax.
-        
+
         Args:
             temperature: The temperature of the softmax.
         """
@@ -19,7 +19,7 @@ class SimpleLogSoftmaxTemperature(Module):
 
     def forward(self, num: Tensor, denom: Tensor) -> Tensor:
         """Compute the log softmax.
-        
+
         Args:
             num: The numerator of the log softmax. Shape: (1,)
             denom: The denominator of the log softmax. Shape: (N,)"""

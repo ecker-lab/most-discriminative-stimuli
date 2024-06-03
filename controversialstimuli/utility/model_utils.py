@@ -42,7 +42,11 @@ def load_transl_model(model_tab, key, rf_loc):
     return dataloaders, model
 
 
-def translate_model(model: nn.Module, rf_loc: Optional[Union[NDArray, list]]=None, canvas_size: Optional[tuple[int, int]]=None) -> nn.Module:
+def translate_model(
+    model: nn.Module,
+    rf_loc: Optional[Union[NDArray, list]] = None,
+    canvas_size: Optional[tuple[int, int]] = None,
+) -> nn.Module:
     """Translates model readout receptive field positions. Works for ensembles, Gaussian readout and factorized readout.
 
     Args:
@@ -65,7 +69,9 @@ def translate_model(model: nn.Module, rf_loc: Optional[Union[NDArray, list]]=Non
             return transl_gauss_readout_pos(member, rf_loc=None)
 
         else:
-            raise NotImplementedError(f"`translate_model` cannot handle `{single_readout}` readout type")
+            raise NotImplementedError(
+                f"`translate_model` cannot handle `{single_readout}` readout type"
+            )
 
     if hasattr(model, "members"):
         for member in model.members:
@@ -74,7 +80,6 @@ def translate_model(model: nn.Module, rf_loc: Optional[Union[NDArray, list]]=Non
         model = translate_member_model(model, rf_loc, canvas_size)
 
     return model
-
 
 
 def transl_gauss_readout_pos(model, rf_loc=None):
@@ -94,7 +99,9 @@ def transl_gauss_readout_pos(model, rf_loc=None):
         torch model: _description_
     """
     if len(model.readout.values()) > 1:
-        raise NotImplementedError("Handling for different readout data_keys not implemented")
+        raise NotImplementedError(
+            "Handling for different readout data_keys not implemented"
+        )
 
     training_status = model.training
     model.eval()
@@ -109,14 +116,18 @@ def transl_gauss_readout_pos(model, rf_loc=None):
         else:
             # mu_shape = readout._mu.shape
             print("RF_LOC", rf_loc)
-            readout._mu -= torch.tensor(rf_loc).view(readout._mu.shape).to(readout._mu.device)
+            readout._mu -= (
+                torch.tensor(rf_loc).view(readout._mu.shape).to(readout._mu.device)
+            )
 
     model.train(training_status)
 
     return model
 
 
-def canvas_coord_abs2rel(locations: NDArray, canvas_size: tuple[int, int]=(36, 64)) -> NDArray:
+def canvas_coord_abs2rel(
+    locations: NDArray, canvas_size: tuple[int, int] = (36, 64)
+) -> NDArray:
     """Transforms absolute canvas coordinates to relative ones in the -1, 1 interval.
 
     Args:
@@ -127,5 +138,3 @@ def canvas_coord_abs2rel(locations: NDArray, canvas_size: tuple[int, int]=(36, 6
         _type_: (Height, width)
     """
     return ((locations / np.array(canvas_size)) - 0.5) * 2
-
-

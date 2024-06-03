@@ -39,7 +39,9 @@ def plot_stimulus_composition(
     abs_max = np.max([abs(spat.max()), abs(spat.min())])
     norm = Normalize(vmin=-abs_max, vmax=abs_max)
     spatial_ax.imshow(spat, cmap="RdBu_r", norm=norm)
-    scale_bar = Rectangle(xy=(6, 15), width=3, height=1, color="k", transform=spatial_ax.transData)
+    scale_bar = Rectangle(
+        xy=(6, 15), width=3, height=1, color="k", transform=spatial_ax.transData
+    )
     spatial_ax.annotate(
         text="150 µm",
         xy=(6, 14),
@@ -55,8 +57,12 @@ def plot_stimulus_composition(
         temporal_trace_ax.plot(stimulus_time, temp, color=color_array[color_idx])
 
         if freq_ax is not None:
-            fft_freqs, fft_weights = calculate_fft(temp, FRAME_RATE_MODEL, lowpass_cutoff)
-            weighted_main_freqs[color_idx] = weighted_main_frequency(fft_freqs, fft_weights)
+            fft_freqs, fft_weights = calculate_fft(
+                temp, FRAME_RATE_MODEL, lowpass_cutoff
+            )
+            weighted_main_freqs[color_idx] = weighted_main_frequency(
+                fft_freqs, fft_weights
+            )
             freq_ax.plot(fft_freqs, fft_weights, color=color_array[color_idx])
 
     temporal_trace_ax.set_ylim(-temporal_traces_max, +temporal_traces_max + 1)
@@ -75,4 +81,6 @@ def plot_stimulus_composition(
         for x_0_idx, x_1_idx in highlight_x_list:
             x_0 = stimulus_time[x_0_idx]
             x_1 = stimulus_time[x_1_idx]
-            temporal_trace_ax.fill_betweenx(temporal_trace_ax.get_ylim(), x_0, x_1, color="k", alpha=0.1)
+            temporal_trace_ax.fill_betweenx(
+                temporal_trace_ax.get_ylim(), x_0, x_1, color="k", alpha=0.1
+            )

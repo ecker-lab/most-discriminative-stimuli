@@ -1,6 +1,5 @@
 """Computes confusion matrices for cluster stimuli and analyze those. Plotting functions can be found in ..utility.plot"""
 
-
 import warnings
 from typing import Dict, Iterable, Optional, Union
 
@@ -14,7 +13,12 @@ from sklearn.cluster import SpectralBiclustering, SpectralCoclustering
 from .model import norm_unit_act_imgs, pred_max_rot
 
 
-def cluster_conf_mtx(conf_mtx: np.ndarray, n_clusters: int, optimizer_cls: Union[SpectralBiclustering, SpectralCoclustering], random_state: int = 1000):
+def cluster_conf_mtx(
+    conf_mtx: np.ndarray,
+    n_clusters: int,
+    optimizer_cls: Union[SpectralBiclustering, SpectralCoclustering],
+    random_state: int = 1000,
+):
     """Cluster the confusion matrix.
 
     Args:
@@ -33,7 +37,9 @@ def cluster_conf_mtx(conf_mtx: np.ndarray, n_clusters: int, optimizer_cls: Union
             f"Invalid optimizer class: {optimizer_cls}. Must be either SpectralBiclustering or SpectralCoclustering."
         )
 
-    model = optimizer_cls(n_clusters=n_clusters, svd_method="arpack", random_state=random_state)
+    model = optimizer_cls(
+        n_clusters=n_clusters, svd_method="arpack", random_state=random_state
+    )
     model.fit(conf_mtx)
 
     fit_data = conf_mtx[np.argsort(model.row_labels_)]
@@ -42,7 +48,12 @@ def cluster_conf_mtx(conf_mtx: np.ndarray, n_clusters: int, optimizer_cls: Union
     return fit_data, model.row_labels_, model.column_labels_
 
 
-def cluster_mtx(mtx: np.ndarray, metric:str = "euclidean", col_cluster:bool=True, row_cluster:bool=False):
+def cluster_mtx(
+    mtx: np.ndarray,
+    metric: str = "euclidean",
+    col_cluster: bool = True,
+    row_cluster: bool = False,
+):
     """[summary]
 
     Args:
@@ -59,7 +70,11 @@ def cluster_mtx(mtx: np.ndarray, metric:str = "euclidean", col_cluster:bool=True
         raise ValueError("Exactly one of col_cluster and row_cluster must be True.")
 
     clustergrid = sns.clustermap(
-        mtx, method="average", col_cluster=col_cluster, row_cluster=row_cluster, metric=metric
+        mtx,
+        method="average",
+        col_cluster=col_cluster,
+        row_cluster=row_cluster,
+        metric=metric,
     )
     plt.close()
 
@@ -74,7 +89,9 @@ def cluster_mtx(mtx: np.ndarray, metric:str = "euclidean", col_cluster:bool=True
     return conf_mtx_sorted, idc
 
 
-def norm_conf_mtx(conf_mtx: np.ndarray, norm_axis: Optional[Union[str, Iterable[str]]] = None):
+def norm_conf_mtx(
+    conf_mtx: np.ndarray, norm_axis: Optional[Union[str, Iterable[str]]] = None
+):
     """
     Normalize a confusion matrix based on the specified normalization axis.
 
@@ -117,7 +134,9 @@ def norm_conf_mtx(conf_mtx: np.ndarray, norm_axis: Optional[Union[str, Iterable[
         elif norm_axis == "col_l1":
             divisor = np.sum(np.abs(conf_mtx), axis=0, keepdims=True)
         else:
-            raise ValueError(f"Invalid axis: {norm_axis}. Must be 'row', 'column', 'row_diag', 'column_diag', 'row_l1', or 'col_l1'.")
+            raise ValueError(
+                f"Invalid axis: {norm_axis}. Must be 'row', 'column', 'row_diag', 'column_diag', 'row_l1', or 'col_l1'."
+            )
 
         divisor_positive = np.maximum(divisor, 1e-8)
         conf_mtx = conf_mtx / divisor_positive
@@ -175,7 +194,9 @@ def compute_conf_mtx(
     #         )),
     #     ), f"Failed for cluster index {clust_idx}"
 
-    preds = norm_unit_act_imgs(preds, norm_pred_ac_imgs, repeats_dataloader, stds, means)
+    preds = norm_unit_act_imgs(
+        preds, norm_pred_ac_imgs, repeats_dataloader, stds, means
+    )
 
     if select_unit_idc is not None:
         # flat_select_unit_idc = np.concatenate(select_unit_idc).flatten()
@@ -184,7 +205,10 @@ def compute_conf_mtx(
 
     # aggregate within cluster
     conf_mtx = [
-        [pred_to_clust_img[clust_assignments == clust_idx].mean() for clust_idx in range(preds.shape[0])]
+        [
+            pred_to_clust_img[clust_assignments == clust_idx].mean()
+            for clust_idx in range(preds.shape[0])
+        ]
         for pred_to_clust_img in preds
     ]  # (row: index of cluster for which cMEIs were computed, col: index of cluster to which the cMEIs were presented)
     conf_mtx = np.array(conf_mtx)
@@ -192,7 +216,9 @@ def compute_conf_mtx(
     return conf_mtx
 
 
-def compute_pred_conf_mtx_raw(transl_model, canvas_size, clust_imgs, true_clust_id, select_unit_idc=None):
+def compute_pred_conf_mtx_raw(
+    transl_model, canvas_size, clust_imgs, true_clust_id, select_unit_idc=None
+):
     """Compute cluster prediction confusion matrix.
 
     Args:

@@ -22,6 +22,7 @@ setup(
         "Intended Audience :: Science/Research",
         "Programming Language :: Python :: 3 :: Only",
         "License :: OSI Approved :: MIT License",
-        "Natural Language :: English" "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Natural Language :: English"
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
 )

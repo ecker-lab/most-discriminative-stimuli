@@ -4,8 +4,8 @@ import torch
 # based on https://github.com/sinzlab/mei
 # - mei.legacy.utils.varargin
 # - mei.legacy.ops.ChangeNormJointlyClipRangeSeparately
- 
-# originally published under the 
+
+# originally published under the
 
 # MIT License
 
@@ -31,7 +31,7 @@ import torch
 
 
 def varargin(f):
-    """ Decorator to make a function able to ignore named parameters not declared in its
+    """Decorator to make a function able to ignore named parameters not declared in its
      definition.
 
     Arguments:
@@ -68,7 +68,7 @@ def varargin(f):
 
 
 class OptimizationClipperNoop:
-    """ No-op clipper. """
+    """No-op clipper."""
 
     @varargin
     def __call__(self, x):
@@ -76,14 +76,16 @@ class OptimizationClipperNoop:
 
 
 class ChangeNormJointlyClipRangeSeparately:
-    """ Change the norm, then clip the value of x to some specified range
+    """Change the norm, then clip the value of x to some specified range
     Arguments:
         norm (float):   Desired norm
         x_min (float):  Lower valid value
         x_max (float):  Higher valid value
     """
 
-    def __init__(self, norm, x_min_green, x_max_green, x_min_uv, x_max_uv, device="cuda"):
+    def __init__(
+        self, norm, x_min_green, x_max_green, x_min_uv, x_max_uv, device="cuda"
+    ):
         self.norm = norm
         self.x_min_green = x_min_green
         self.x_max_green = x_max_green
@@ -108,9 +110,5 @@ class ChangeNormJointlyClipRangeSeparately:
         dichrom_max = torch.stack([x_max_green, x_max_uv], dim=1)
         dichrom_max = dichrom_max.to(self._device)
         dichrom_min = dichrom_min.to(self._device)
-        renorm_clipped = torch.max(
-            torch.min(
-                renorm, dichrom_max
-            ), dichrom_min
-        )
+        renorm_clipped = torch.max(torch.min(renorm, dichrom_max), dichrom_min)
         return renorm_clipped

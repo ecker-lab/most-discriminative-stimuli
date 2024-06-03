@@ -1,6 +1,8 @@
 import numpy as np
 import torch
-from controversialstimuli.optimization.controversial_objectives import ContrastiveNeuronUnif
+from controversialstimuli.optimization.controversial_objectives import (
+    ContrastiveNeuronUnif,
+)
 
 
 def test_objective_matches_basic_math():
@@ -12,7 +14,9 @@ def test_objective_matches_basic_math():
     resp2_off = torch.zeros(num_units, dtype=torch.float32)
     resp3_off = torch.zeros(num_units, dtype=torch.float32)
     resp3_on = torch.ones(num_units, dtype=torch.float32)
-    cluster_assignments = torch.cat([torch.zeros(num_units), torch.ones(num_units), 2 * torch.ones(num_units)]).tolist()
+    cluster_assignments = torch.cat(
+        [torch.zeros(num_units), torch.ones(num_units), 2 * torch.ones(num_units)]
+    ).tolist()
     cluster_assignments = [int(c) for c in cluster_assignments]
 
     t = 1
@@ -27,7 +31,12 @@ def test_objective_matches_basic_math():
     ll_exps_mean = torch.mean(ll_exps)
     obj1 = torch.log(l_exp / ll_exps_mean)
 
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=0, off_clust_idc=[1, 2], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=0,
+        off_clust_idc=[1, 2],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     obj2 = objective_fn(torch.cat(ll).unsqueeze(0))
     assert torch.allclose(obj1, obj2)
 
@@ -45,7 +54,12 @@ def test_objective_matches_basic_math():
     obj1a = torch.log(l_exp / ll_exps_mean)
     assert torch.allclose(obj1a, obj1)
 
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=1, off_clust_idc=[0, 2], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=1,
+        off_clust_idc=[0, 2],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     obj2a = objective_fn(torch.cat(ll).unsqueeze(0))
     assert torch.allclose(obj2a, obj2)
     assert torch.allclose(obj1a, obj2a)
@@ -63,7 +77,12 @@ def test_objective_matches_basic_math():
     obj1a = torch.log(l_exp / ll_exps_mean)
     assert torch.allclose(obj1a, obj1)
 
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=2, off_clust_idc=[0, 1], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=2,
+        off_clust_idc=[0, 1],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     obj2a = objective_fn(torch.cat(ll).unsqueeze(0))
     assert torch.allclose(obj2a, obj2)
     assert torch.allclose(obj1a, obj2a)
@@ -81,7 +100,12 @@ def test_objective_matches_basic_math():
     ll_exps_mean = torch.mean(ll_exps)
     obj1_ignore0 = torch.log(l_exp / ll_exps_mean)
 
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=2, off_clust_idc=[1], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=2,
+        off_clust_idc=[1],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     obj2_ignore0a = objective_fn(torch.cat([resp1_off] + ll).unsqueeze(0))
     obj2_ignore0b = objective_fn(torch.cat([resp1_on] + ll).unsqueeze(0))
     assert torch.allclose(obj2_ignore0a, obj2_ignore0b)
@@ -100,10 +124,17 @@ def test_objective_matches_basic_math():
     obj2 = torch.log(l_exp / ll_exps_mean)
 
     cluster_assignments = torch.cat(
-        [torch.zeros(num_units + num_units // 2), torch.ones(num_units + num_units // 2)]
+        [
+            torch.zeros(num_units + num_units // 2),
+            torch.ones(num_units + num_units // 2),
+        ]
     ).tolist()
     objective_fn = ContrastiveNeuronUnif(
-        on_clust_idx=0, off_clust_idc=[1], clust_assignments=cluster_assignments, temperature=t, device="cpu"
+        on_clust_idx=0,
+        off_clust_idc=[1],
+        clust_assignments=cluster_assignments,
+        temperature=t,
+        device="cpu",
     )
     obj1 = objective_fn(torch.cat(ll).unsqueeze(0))
     assert torch.allclose(obj1, obj2)
@@ -126,10 +157,16 @@ def test_objective_matches_basic_math():
     clust3_logits = torch.tensor(clust3, dtype=torch.float64)
 
     logits = torch.cat([clust1_logits, clust2_logits, clust3_logits])
-    cluster_assignments = torch.cat([torch.zeros(5), torch.ones(4), torch.ones(1) * 2]).tolist()
+    cluster_assignments = torch.cat(
+        [torch.zeros(5), torch.ones(4), torch.ones(1) * 2]
+    ).tolist()
 
     objective_fn = ContrastiveNeuronUnif(
-        on_clust_idx=1, off_clust_idc=[0, 2], clust_assignments=cluster_assignments, temperature=t, device="cpu"
+        on_clust_idx=1,
+        off_clust_idc=[0, 2],
+        clust_assignments=cluster_assignments,
+        temperature=t,
+        device="cpu",
     )
     obj1 = objective_fn(logits.unsqueeze(0))
     assert torch.allclose(obj1, torch.tensor(obj2, dtype=torch.float64))
@@ -141,30 +178,61 @@ def test_contrastive_neuron_decreases_for_redundant_cluster():
     resp1_off = torch.zeros(num_units, dtype=torch.float32)
     resp2_on = torch.ones(num_units, dtype=torch.float32)
     resp2_off = torch.zeros(num_units, dtype=torch.float32)
-    cluster_assignments = torch.cat([torch.zeros(num_units), torch.ones(num_units)]).tolist()
+    cluster_assignments = torch.cat(
+        [torch.zeros(num_units), torch.ones(num_units)]
+    ).tolist()
 
     # 2 clusters
     obj2 = []
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=0, off_clust_idc=[1], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=0,
+        off_clust_idc=[1],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     o = objective_fn(torch.cat([resp1_on, resp2_off]).unsqueeze(0))
     obj2.append(o)
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=1, off_clust_idc=[0], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=1,
+        off_clust_idc=[0],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     o = objective_fn(torch.cat([resp1_off, resp2_on]).unsqueeze(0))
     obj2.append(o)
     obj2_mean = np.mean(obj2)
 
     # 3 clusters
     cluster_assignments = torch.cat(
-        [torch.zeros(num_units), torch.ones(num_units // 2), 2 * torch.ones(num_units // 2)]
+        [
+            torch.zeros(num_units),
+            torch.ones(num_units // 2),
+            2 * torch.ones(num_units // 2),
+        ]
     ).tolist()
     obj3 = []
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=0, off_clust_idc=[1, 2], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=0,
+        off_clust_idc=[1, 2],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     o = objective_fn(torch.cat([resp1_on, resp2_off]).unsqueeze(0))
     obj3.append(o)
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=1, off_clust_idc=[0, 2], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=1,
+        off_clust_idc=[0, 2],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     o = objective_fn(torch.cat([resp1_off, resp2_on]).unsqueeze(0))
     obj3.append(o)
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=2, off_clust_idc=[1, 0], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=2,
+        off_clust_idc=[1, 0],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     o = objective_fn(torch.cat([resp1_off, resp2_on]).unsqueeze(0))
     obj3.append(o)
     obj3_mean = np.mean(obj3)
@@ -183,27 +251,52 @@ def test_contrastive_neuron_decreases_when_removing_required_cluster():
     resp2_off = torch.zeros(num_units, dtype=torch.float32)
     resp3_on = torch.ones(num_units, dtype=torch.float32)
     resp3_off = torch.zeros(num_units, dtype=torch.float32)
-    cluster_assignments = torch.cat([torch.zeros(num_units), torch.ones(num_units), 2 * torch.ones(num_units)]).tolist()
+    cluster_assignments = torch.cat(
+        [torch.zeros(num_units), torch.ones(num_units), 2 * torch.ones(num_units)]
+    ).tolist()
 
     # 3 clusters
     obj3 = []
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=0, off_clust_idc=[1, 2], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=0,
+        off_clust_idc=[1, 2],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     o = objective_fn(torch.cat([resp1_on, resp2_off, resp3_off]).unsqueeze(0))
     obj3.append(o)
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=1, off_clust_idc=[0, 2], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=1,
+        off_clust_idc=[0, 2],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     o = objective_fn(torch.cat([resp1_off, resp2_on, resp3_off]).unsqueeze(0))
     obj3.append(o)
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=2, off_clust_idc=[1, 0], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=2,
+        off_clust_idc=[1, 0],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     o = objective_fn(torch.cat([resp1_off, resp2_off, resp3_on]).unsqueeze(0))
     obj3.append(o)
     obj3_mean = np.mean(obj3)
 
     # 2 clusters
     cluster_assignments = torch.cat(
-        [torch.zeros(num_units + num_units // 2), torch.ones(num_units + num_units // 2)]
+        [
+            torch.zeros(num_units + num_units // 2),
+            torch.ones(num_units + num_units // 2),
+        ]
     ).tolist()
     obj2 = []
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=0, off_clust_idc=[1], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=0,
+        off_clust_idc=[1],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     o = objective_fn(
         torch.cat(
             [
@@ -213,7 +306,12 @@ def test_contrastive_neuron_decreases_when_removing_required_cluster():
         ).unsqueeze(0)
     )
     obj2.append(o)
-    objective_fn = ContrastiveNeuronUnif(on_clust_idx=1, off_clust_idc=[0], clust_assignments=cluster_assignments, device="cpu")
+    objective_fn = ContrastiveNeuronUnif(
+        on_clust_idx=1,
+        off_clust_idc=[0],
+        clust_assignments=cluster_assignments,
+        device="cpu",
+    )
     o = objective_fn(
         torch.cat(
             [

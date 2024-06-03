@@ -11,7 +11,9 @@ import seaborn as sns
 from numpy.typing import ArrayLike
 import scipy
 
-from controversialstimuli.utility.retina.constants import RGC_GROUP_NAMES_DICT_SHORT_PAPER
+from controversialstimuli.utility.retina.constants import (
+    RGC_GROUP_NAMES_DICT_SHORT_PAPER,
+)
 
 
 def config_seaborn(
@@ -31,7 +33,9 @@ def imshow_gray_sym(img, ax=None, axis="off", vmax_abs=None, mark_center=False):
     vmax = np.max(np.abs(img))
     vmax = vmax_abs or np.max(np.abs(img))
     if mark_center:
-        ax.scatter([img.shape[1] / 2], [img.shape[0] / 2], color="black", marker="x", s=1)
+        ax.scatter(
+            [img.shape[1] / 2], [img.shape[0] / 2], color="black", marker="x", s=1
+        )
     ret = ax.imshow(img.squeeze(), cmap="gray", vmin=-vmax, vmax=vmax)
     ax.axis(axis)
     return ret
@@ -50,7 +54,9 @@ def get_subplots_grid(num_imgs, *args, ncols=6, size_scale=2, axes_off=True, **k
         Tuple: figure, axes
     """
     nrows = ceil(num_imgs / ncols)
-    fig, axes = plt.subplots(nrows, ncols, *args, figsize=(size_scale * ncols, size_scale * nrows), **kwargs)
+    fig, axes = plt.subplots(
+        nrows, ncols, *args, figsize=(size_scale * ncols, size_scale * nrows), **kwargs
+    )
 
     if axes_off:
         for ax in axes.flatten():
@@ -98,8 +104,14 @@ def show_grid(ax, xpos, ypos):
     ax.grid(color=(147 / 255, 109 / 255, 109 / 255), linestyle="-", linewidth=1)
 
 
-def plot_mei(ax, key, restriction, mei_tab, title_clust_id, title_prefix, show_metrics=True):
-    img = (mei_tab() & key & restriction).get_images(field_name="cluster_images").squeeze()[0]
+def plot_mei(
+    ax, key, restriction, mei_tab, title_clust_id, title_prefix, show_metrics=True
+):
+    img = (
+        (mei_tab() & key & restriction)
+        .get_images(field_name="cluster_images")
+        .squeeze()[0]
+    )
     imshow_gray_sym(img, ax=ax, axis="on")
     show_grid(ax, [image_mid(img, 1)], [image_mid(img, 0)])
     avg_pred = (mei_tab() & key & restriction).fetch1("avg_prediction")
@@ -111,7 +123,11 @@ def plot_mei(ax, key, restriction, mei_tab, title_clust_id, title_prefix, show_m
 
 
 def plot_ci(ax, key, restriction, ci_tab, title_prefix, show_metrics=True):
-    img = (ci_tab() & key & restriction).get_images(field_name="cluster_images").squeeze()[0]
+    img = (
+        (ci_tab() & key & restriction)
+        .get_images(field_name="cluster_images")
+        .squeeze()[0]
+    )
     imshow_gray_sym(img, ax=ax, axis="on")
     show_grid(ax, [image_mid(img, 1)], [image_mid(img, 0)])
 
@@ -129,14 +145,26 @@ def plot_ci(ax, key, restriction, ci_tab, title_prefix, show_metrics=True):
     ax.set_title(title)
 
 
-def plot_conf_mtx(conf_mtx, annot, xticklabels="auto", yticklabels="auto", vmin=None, vmax=None, center=None, **kwargs):
+def plot_conf_mtx(
+    conf_mtx,
+    annot,
+    xticklabels="auto",
+    yticklabels="auto",
+    vmin=None,
+    vmax=None,
+    center=None,
+    **kwargs,
+):
     """Plot confusion matrix.
 
     Args:
         conf_mtx (np.ndarray): Confusion matrix.
-        center (float, optional): Value at which to center colormap to plot diverging data. Defaults to None."""
+        center (float, optional): Value at which to center colormap to plot diverging data. Defaults to None.
+    """
 
-    fig, ax = plt.subplots(figsize=(cm2inch(0.5) * len(conf_mtx), cm2inch(0.5) * len(conf_mtx)))
+    fig, ax = plt.subplots(
+        figsize=(cm2inch(0.5) * len(conf_mtx), cm2inch(0.5) * len(conf_mtx))
+    )
 
     sns.heatmap(
         data=conf_mtx,
@@ -184,9 +212,11 @@ class ImagePlotter(ConfMtxLabelPlotter):
         imshow_gray_sym(self._image, axes[0])
 
 
-def decompose_kernel(space_time_kernel: np.array, scaling_factor: float = 1.0) -> Tuple[np.array, np.array, np.array]:
+def decompose_kernel(
+    space_time_kernel: np.array, scaling_factor: float = 1.0
+) -> Tuple[np.array, np.array, np.array]:
     """
-    Computes the SVD of a space-time kernel. Scales spatial and temporal components such that spatial component is in 
+    Computes the SVD of a space-time kernel. Scales spatial and temporal components such that spatial component is in
         the range [-1, 1]
     Args:
         space_time_kernel: shape=[time, y_shape, x.shape]
@@ -208,7 +238,9 @@ def decompose_kernel(space_time_kernel: np.array, scaling_factor: float = 1.0) -
 
     # Flip sign if center of spatial component is negative
     center_y, center_x = int(dy / 2), int(dx / 2)
-    spatial_center = reshaped_spatial[center_y - 1 : center_y + 2, center_x - 1 : center_x + 2]
+    spatial_center = reshaped_spatial[
+        center_y - 1 : center_y + 2, center_x - 1 : center_x + 2
+    ]
     spatial_center_mean = np.mean(spatial_center)
     if spatial_center_mean < 0:
         spatial *= -1
@@ -258,7 +290,11 @@ class MoviePlotter(ConfMtxLabelPlotter):
         temporal_ax.plot(self._temporal_green, color=green_color)
         temporal_ax.plot(self._temporal_uv, color=uv_color)
         temporal_ax.fill_betweenx(
-            temporal_ax.get_ylim(), self._highlight_region[0], self._highlight_region[1], color="k", alpha=0.1
+            temporal_ax.get_ylim(),
+            self._highlight_region[0],
+            self._highlight_region[1],
+            color="k",
+            alpha=0.1,
         )
 
         spatial_plot_list = [
@@ -270,8 +306,16 @@ class MoviePlotter(ConfMtxLabelPlotter):
             norm = Normalize(vmin=-abs_max, vmax=abs_max)
             spatial_ax.imshow(spatial_comp, cmap="RdBu_r", norm=norm)
             # Add a colored box around the image
-            spatial_ax.add_patch(Rectangle((0, 0), spatial_comp.shape[1] - 1, spatial_comp.shape[0] - 1,
-                                           edgecolor=color, facecolor='none', linewidth=2))
+            spatial_ax.add_patch(
+                Rectangle(
+                    (0, 0),
+                    spatial_comp.shape[1] - 1,
+                    spatial_comp.shape[0] - 1,
+                    edgecolor=color,
+                    facecolor="none",
+                    linewidth=2,
+                )
+            )
 
         for ax in axes:
             ax.set_axis_off()
@@ -309,12 +353,12 @@ def plot_conf_mtx_imgs(
         annot: Data used to annotate the heatmap cells. See sns.heatmap for more information.
         h_plotter_list (List[ConfMtxLabelPlotter]): List of horizontal label plotters.
         v_plotter_list (Optional[List[ConfMtxLabelPlotter]]): List of vertical label plotters.
-        fmt (str, optional): String formatting code to use when adding annotations. See sns.heatmap for details. 
+        fmt (str, optional): String formatting code to use when adding annotations. See sns.heatmap for details.
             Defaults to "".
         title (str, optional): Title of the plot. Defaults to "".
-        xticklabels (str or list, optional): Labels for the x-axis ticks. See sns.heatmap for details. 
+        xticklabels (str or list, optional): Labels for the x-axis ticks. See sns.heatmap for details.
             Defaults to "auto".
-        yticklabels (str or list, optional): Labels for the y-axis ticks. See sns.heatmap for details. 
+        yticklabels (str or list, optional): Labels for the y-axis ticks. See sns.heatmap for details.
             Defaults to "auto".
         xlabel (str, optional): Label for the x-axis. Defaults to None.
         ylabel (str, optional): Label for the y-axis. Defaults to None.
@@ -324,7 +368,7 @@ def plot_conf_mtx_imgs(
         cbar (bool, optional): Whether to show the colorbar. Defaults to True.
         figsize_scale (float, optional): Scaling factor for the figure size. Defaults to 0.6.
         figsize (tuple, optional): Figure size in inches. Defaults to None.
-        annot_kws (dict, optional): Additional keyword arguments for annotating the heatmap. See sns.heatmap for 
+        annot_kws (dict, optional): Additional keyword arguments for annotating the heatmap. See sns.heatmap for
             details. Defaults to None.
         paper (bool, optional): Whether to optimize the plot for printing on paper. Defaults to False.
         **kwargs: Additional keyword arguments for the seaborn heatmap.
@@ -336,16 +380,23 @@ def plot_conf_mtx_imgs(
         annot_kws = {"fontsize": 7}
 
     num_h_plotting_axes = h_plotter_list[0].num_of_required_axes()
-    num_v_plotting_axes = num_h_plotting_axes if v_plotter_list is None else v_plotter_list[0].num_of_required_axes()
+    num_v_plotting_axes = (
+        num_h_plotting_axes
+        if v_plotter_list is None
+        else v_plotter_list[0].num_of_required_axes()
+    )
     num = len(h_plotter_list)
     subplot_shape = (num + num_v_plotting_axes, num + num_h_plotting_axes)
     if figsize:
-        print('overwrite figsize_scale argument')
+        print("overwrite figsize_scale argument")
     figsize = figsize or cm2inch(figsize_scale) * np.array(subplot_shape)
     fig = plt.figure(figsize=figsize)
 
     v_axes = [
-        [plt.subplot2grid(subplot_shape, (i, subplot_shape[1] - k)) for k in range(1, num_v_plotting_axes + 1)]
+        [
+            plt.subplot2grid(subplot_shape, (i, subplot_shape[1] - k))
+            for k in range(1, num_v_plotting_axes + 1)
+        ]
         for i in range(num_h_plotting_axes, subplot_shape[0])
     ]
     h_axes = [
@@ -359,7 +410,9 @@ def plot_conf_mtx_imgs(
         colspan=subplot_shape[1] - num_h_plotting_axes,
     )
 
-    for plotter, ax_list in zip(v_plotter_list if v_plotter_list is not None else h_plotter_list, v_axes):
+    for plotter, ax_list in zip(
+        v_plotter_list if v_plotter_list is not None else h_plotter_list, v_axes
+    ):
         plotter.plot(ax_list)
 
     for plotter, ax_list in zip(h_plotter_list, h_axes):
@@ -387,10 +440,11 @@ def plot_conf_mtx_imgs(
     main_ax.set_xlabel("Cluster mean response" if xlabel is None else xlabel)
     if len(title) > 0:
         fig.suptitle(title)
-    plt.subplots_adjust(left=0.175, right=0.84, bottom=0.17, top=0.83, wspace=0, hspace=0)
+    plt.subplots_adjust(
+        left=0.175, right=0.84, bottom=0.17, top=0.83, wspace=0, hspace=0
+    )
 
     return fig
-
 
 
 def get_main_diagonal_annotation(conf_mtx: np.ndarray) -> np.ndarray:
@@ -404,14 +458,14 @@ def get_main_diagonal_annotation(conf_mtx: np.ndarray) -> np.ndarray:
 
 
 def plot_responses(
-        list_of_responses: List[np.array],
-        ax,
-        num_individual_responses_to_plot: int = 10,
-        label: Optional[str] = None,
-        highlight_x_list: Optional[List[int]] = None,
-        time_offset_in_seconds: float = 1.0,
-        color: Optional[str] = None,
-        y_max: Optional[float] = None,
+    list_of_responses: List[np.array],
+    ax,
+    num_individual_responses_to_plot: int = 10,
+    label: Optional[str] = None,
+    highlight_x_list: Optional[List[int]] = None,
+    time_offset_in_seconds: float = 1.0,
+    color: Optional[str] = None,
+    y_max: Optional[float] = None,
 ):
     mean = np.mean(list_of_responses, axis=0)
     FRAME_RATE_MODEL = 30.0
@@ -452,7 +506,9 @@ def plot_traces(
         rgc_id: int(i * cmap.N / len(all_rgc_set))
         for i, rgc_id in enumerate(all_rgc_set)
     }
-    rgc_to_color_dict = {rgc_id: cmap(cmap_id) for rgc_id, cmap_id in rgc_id_to_cmap_id.items()}
+    rgc_to_color_dict = {
+        rgc_id: cmap(cmap_id) for rgc_id, cmap_id in rgc_id_to_cmap_id.items()
+    }
 
     num_neurons_per_cluster = {}
     max_value_traces = 0.0
@@ -474,14 +530,14 @@ def plot_traces(
     fig_cols = num + num_h_plotting_axes
     plot_shape = (fig_rows, fig_cols)
     figsize = cm2inch(figsize_scale) * np.array(plot_shape)
-    plt.rcParams.update({'font.size': 30})
+    plt.rcParams.update({"font.size": 30})
     fig, axes = plt.subplots(fig_rows, fig_cols, figsize=figsize)
 
     for i, c_id in enumerate(cluster_ids):
         plotter = cei_plotter_list[c_id]
-        axes_for_plots = axes[i+num_mei_plotting_axes, :num_h_plotting_axes]
+        axes_for_plots = axes[i + num_mei_plotting_axes, :num_h_plotting_axes]
         plotter.plot(axes_for_plots)
-        axes_for_mei_plots = axes[:num_mei_plotting_axes, i+num_h_plotting_axes]
+        axes_for_mei_plots = axes[:num_mei_plotting_axes, i + num_h_plotting_axes]
         mei_plotter = mei_plotter_list[c_id]
         mei_plotter.plot(axes_for_mei_plots, flip_axes=True)
     for col_id in range(num_h_plotting_axes):
@@ -496,15 +552,28 @@ def plot_traces(
             highlight_x_list = [(10, 19)]
             if type(trace_list) is list:
                 trace_list_stim = [trace[stim_id] for trace in trace_list]
-                plot_responses(trace_list_stim, ax=curr_ax, highlight_x_list=highlight_x_list, color="blue")
+                plot_responses(
+                    trace_list_stim,
+                    ax=curr_ax,
+                    highlight_x_list=highlight_x_list,
+                    color="blue",
+                )
             elif type(trace_list) is dict:
-                rgc_types_sorted = sorted(list(trace_list.keys()), key=lambda idx: -len(trace_list[idx]))
+                rgc_types_sorted = sorted(
+                    list(trace_list.keys()), key=lambda idx: -len(trace_list[idx])
+                )
                 for rgc_it, rgc_type in enumerate(rgc_types_sorted):
                     rgc_trace_list = trace_list[rgc_type]
                     trace_list_stim = [trace[stim_id] for trace in rgc_trace_list]
                     color = rgc_to_color_dict[rgc_type]
-                    plot_responses(trace_list_stim, ax=curr_ax, highlight_x_list=highlight_x_list,
-                                   label=rgc_type, y_max=max_value_traces, color=color)
+                    plot_responses(
+                        trace_list_stim,
+                        ax=curr_ax,
+                        highlight_x_list=highlight_x_list,
+                        label=rgc_type,
+                        y_max=max_value_traces,
+                        color=color,
+                    )
                     highlight_x_list = None
                 # curr_ax.legend(loc="upper left")
             else:
@@ -523,20 +592,29 @@ def plot_traces(
 
     # Add xlabel and ylabel descriptions
     # For font size see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.text.html
-    # x-axis 
-    fig.text(0.6, 0.08, 'Cluster [# neurons]', ha='center')
+    # x-axis
+    fig.text(0.6, 0.08, "Cluster [# neurons]", ha="center")
     # x-axis top
-    fig.text(0.58, 0.9, "Each cluster's group MEI", va='center')
+    fig.text(0.58, 0.9, "Each cluster's group MEI", va="center")
     # y-axis
-    fig.text(0.1, 0.4, 'Presented maximally discriminative stimulus', va='center', rotation='vertical')
+    fig.text(
+        0.1,
+        0.4,
+        "Presented maximally discriminative stimulus",
+        va="center",
+        rotation="vertical",
+    )
 
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
     labels_lines_dict = {la: li for la, li in zip(labels, lines)}
-    sorted_labels = sorted(labels_lines_dict.keys(), key=lambda x : int(x))
+    sorted_labels = sorted(labels_lines_dict.keys(), key=lambda x: int(x))
     lines_list = [labels_lines_dict[k] for k in sorted_labels]
-    sorted_labels_names = [RGC_GROUP_NAMES_DICT_SHORT_PAPER[int(x)] for x in sorted_labels]
-    fig.legend(lines_list, sorted_labels_names, loc='lower left', bbox_to_anchor=(0.9, 0.2))
+    sorted_labels_names = [
+        RGC_GROUP_NAMES_DICT_SHORT_PAPER[int(x)] for x in sorted_labels
+    ]
+    fig.legend(
+        lines_list, sorted_labels_names, loc="lower left", bbox_to_anchor=(0.9, 0.2)
+    )
 
     return fig
-
