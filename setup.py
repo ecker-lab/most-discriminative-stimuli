@@ -9,20 +9,11 @@ with open(path.join(here, "requirements.txt")) as f:
 setup(
     name="controversial-stimuli",
     version="0.0.0",
-    description="A framework used to generate controversial stimuli",
-    author="Max Burg",
+    description="A framework used to generate most discriminative stimuli",
+    author="Max Burg, Thomas Zenkel",
     author_email="max.burg@bethgelab.org",
-    # license="MIT",
-    url="https://github.com/MaxFBurg/controversial-stimuli",
-    # keywords="feature visualization MEI pytorch",
+    license="MIT",
+    url="https://github.com/ecker-lab/most-discriminative-stimuli",
     packages=find_packages(exclude=[]),
     install_requires=requirements,
-    classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Intended Audience :: Science/Research",
-        "Programming Language :: Python :: 3 :: Only",
-        "License :: OSI Approved :: MIT License",
-        "Natural Language :: English"
-        "Topic :: Scientific/Engineering :: Bio-Informatics",
-    ],
 )
