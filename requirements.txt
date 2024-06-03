@@ -1,0 +1,14 @@
+datajoint
+numpy
+seaborn
+matplotlib
+torch
+pandas
+scipy
+torchvision
+gitpython
+pyyaml
+scikit-learn
+nnfabrik
+neuralpredictors
+neuro-mei
