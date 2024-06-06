@@ -9,7 +9,7 @@ The code is tested using python3.9. Install it as follows:
 python3.9 -m venv venv
 source venv/bin/activate
 # Install repository
-pip install --use-pep517 .
+pip install .
 ```
 
 ## Example
