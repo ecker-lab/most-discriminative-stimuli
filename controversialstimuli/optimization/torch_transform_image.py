@@ -14,7 +14,6 @@ from nnfabrik.utility.nn_helpers import set_random_seed
 
 from ..regularizers import LaplaceLoss
 from ..utility.misc_helpers import get_verbose_print_fct
-from ..utility.layer_utils import sigmoid_centered
 from .cluster_image_base import ActMaxClustImgBase
 from .stoppers import EMALossStopper, ImgPxIntensityChangeStopper
 

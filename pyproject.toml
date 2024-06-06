@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "controversialstimuli"
+version = "0.1.0"
+requires-python = ">=3.9"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Max Burg", email = "max.burg@bethgelab.org"},
+  {name = "Thomas Zenkel"},
+]
+dynamic = ["dependencies"]
+
+[project.urls]
+Repository = "https://github.com/ecker-lab/most-discriminative-stimuli"
+
+[tool.setuptools.packages]
+find = {exclude = ["tests"]}
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
