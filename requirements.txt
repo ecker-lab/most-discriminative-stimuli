@@ -9,6 +9,6 @@ torchvision
 gitpython
 pyyaml
 scikit-learn
-nnfabrik
+nnfabrik @ git+https://github.com/sinzlab/nnfabrik.git@29f22bc95841897d734532c02b77423e602ba21f
 neuralpredictors
 neuro-mei

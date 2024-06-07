@@ -3,13 +3,13 @@
 Official implementation of the optimization based clustering algorithm described in the ICLR 2024 paper [Most discriminative stimuli for functional cell type clustering](https://openreview.net/forum?id=9W6KaAcYlr).
 
 ## Installation
-The code is tested using python3.9. Install it as follows:
+The code is tested using python3.9 and 3.10. Install it as follows:
 ```commandline
 # Optional: create and activate virtual environment
-python3.9 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 # Install repository
-pip install --use-pep517 .
+pip install .
 ```
 
 ## Example

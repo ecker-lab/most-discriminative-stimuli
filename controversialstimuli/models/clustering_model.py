@@ -8,10 +8,6 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-from torchvision.transforms import CenterCrop
-
-from controversialstimuli.utility.pixel_image import RotateImg
-
 
 logger = logging.getLogger(__name__)
 
